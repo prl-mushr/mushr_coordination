@@ -3,7 +3,11 @@
 # MuSHR Coordination
 
 ## Install
-Clone repo: ``` cd ~/catkin_ws/src/ && git clone git@github.com:podshara/libMultiRobotPlanning.git```
+Clone repo: 
+``` 
+cd ~/catkin_ws/src/ && git clone https://github.com/prl-mushr/mushr_coordination.git
+cd mushr_coordination && git clone https://github.com/whoenig/libMultiRobotPlanning.git
+```
 
 ## API
 For adjusting params see `launch/mushr_coordination.launch` it has the environment params for the planner. Change number of Mushr Car in environment by setting parameter `num_agent` and change number of waypoints for each goal by setting parameter `num_waypoint`.
