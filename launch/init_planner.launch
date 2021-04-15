@@ -1,0 +1,10 @@
+<launch>
+    <arg name="map_server" value = "1" />
+    
+    <!-- Launch  map server-->
+    <group if="$(arg map_server)">
+        <include file="$(find mushr_sim)/launch/map_server.launch" />
+    </group>
+
+    <node pkg="mushr_coordination" type="init_planner.py" name="init_planner" output="screen"/>
+</launch>
