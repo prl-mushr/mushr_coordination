@@ -67,6 +67,11 @@ install(DIRECTORY libMultiRobotPlanning/include/libMultiRobotPlanning/
   FILES_MATCHING PATTERN "*.hpp"
 )
 
+install(DIRECTORY libMultiRobotPlanning/example/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+  FILES_MATCHING PATTERN "*.hpp"
+)
+
 #add_library(libMultiRobotPlanning)
 install(TARGETS mushr_coordination
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

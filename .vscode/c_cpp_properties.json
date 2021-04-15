@@ -1,0 +1,22 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "",
+        "limitSymbolsToIncludedHeaders": true
+      },
+      "includePath": [
+        "/home/podshara/catkin_ws/devel/include/**",
+        "/opt/ros/melodic/include/**",
+        "/home/podshara/catkin_ws/src/mushr/mushr_base/mushr_base/ackermann_cmd_mux/include/**",
+        "/opt/ros/melodic/share/fetch_gazebo/include/**",
+        "/home/podshara/catkin_ws/src/mushr_nav_cor/mushr_coordination/include/**",
+        "/home/podshara/catkin_ws/src/mushr/mushr_base/vesc/vesc_ackermann/include/**",
+        "/home/podshara/catkin_ws/src/mushr/mushr_base/vesc/vesc_driver/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS"
+    }
+  ],
+  "version": 4
+}
