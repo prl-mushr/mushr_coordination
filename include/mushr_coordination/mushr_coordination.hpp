@@ -68,6 +68,10 @@ class MushrCoordination {
               10
             ));
       }
+      m_pub_border = nh.advertise<visualization_msgs::Marker>(
+          "/mushr_coordination/border",
+          10
+        );
       m_sub_obs_pose = nh.subscribe("/mushr_coordination/obstacles", 
               10, 
               &MushrCoordination::ObsPoseCallback, 
@@ -198,6 +202,7 @@ class MushrCoordination {
         }
         std::cout << "---------------------" << std::endl;
       }
+      create_border(1, 0, 0, 0.5);
 
       if (success) {
         for (size_t a = 0; a < m_num_agent; ++a) {
@@ -289,6 +294,41 @@ class MushrCoordination {
       m_planning = false;
     }
 
+    void create_border(double r, double b, double g, double thickness) {
+      visualization_msgs::Marker marker;
+
+      geometry_msgs::Point p;
+      p.x = m_minx; p.y = m_miny; p.z = 0.0;
+      marker.points.push_back(p);
+      p.x = m_minx; p.y = m_maxy; p.z = 0.0;
+      marker.points.push_back(p);
+      p.x = m_maxx; p.y = m_maxy; p.z = 0.0;
+      marker.points.push_back(p);
+      p.x = m_maxx; p.y = m_miny; p.z = 0.0;
+      marker.points.push_back(p);
+      p.x = m_minx; p.y = m_miny; p.z = 0.0;
+      marker.points.push_back(p);
+      p.x = m_minx; p.y = m_maxy; p.z = 0.0;
+      marker.points.push_back(p);
+      
+      marker.color.r = r;
+      marker.color.g = b;
+      marker.color.b = g;
+      marker.color.a = 1.0;
+
+      marker.scale.x = thickness;
+      marker.scale.y = thickness;
+      marker.scale.z = thickness;
+
+      marker.header.frame_id = "map";
+      marker.header.stamp = ros::Time();
+      marker.id = 0;
+      marker.type = visualization_msgs::Marker::LINE_STRIP;
+      marker.action = visualization_msgs::Marker::ADD;
+
+      m_pub_border.publish(marker);
+    }
+
     void create_marker(visualization_msgs::Marker* marker, int* mkid, double x, double y, double r, double g, double b, double size) {
       marker->pose.position.x = x;
       marker->pose.position.y = y;
@@ -342,6 +382,7 @@ class MushrCoordination {
     std::vector<ros::Subscriber> m_sub_car_pose;
     ros::Subscriber m_sub_obs_pose;
     ros::Subscriber m_sub_goal;
+    ros::Publisher m_pub_border;
     std::vector<ros::Publisher> m_pub_plan;
     std::vector<ros::Publisher> m_pub_marker;
     std::vector<std::pair<double, double>> m_car_pose;

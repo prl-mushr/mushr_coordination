@@ -46,11 +46,12 @@ include_directories(include
   ${catkin_INCLUDE_DIRS}
   ${Boost_LIBRARIES}
   libMultiRobotPlanning/include
+  libMultiRobotPlanning/example
 )
 
 add_executable(mushr_coordination src/nodes/mushr_coor_node.cpp include/mushr_coordination/mushr_coordination.hpp)
 target_link_libraries(mushr_coordination ${catkin_LIBRARIES})
-add_dependencies(mushr_coordination ${PROJECT_NAME}_generate_messages_cpp)
+add_dependencies(mushr_coordination ${PROJECT_NAME}_generate_messages_cpp libMultiRobotPlanning/example/)
 
 catkin_install_python(PROGRAMS 
   src/init_planner.py

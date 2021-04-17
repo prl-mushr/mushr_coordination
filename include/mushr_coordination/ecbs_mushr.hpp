@@ -9,7 +9,7 @@
 
 #include "libMultiRobotPlanning/ecbs_ta.hpp"
 #include "libMultiRobotPlanning/next_best_assignment.hpp"
-#include "libMultiRobotPlanning/timer.hpp"
+#include "timer.hpp"
 
 using libMultiRobotPlanning::ECBSTA;
 using libMultiRobotPlanning::Neighbor;
@@ -284,7 +284,7 @@ struct hash<Waypoints> {
 };
 }// namespace std
 
-#include <libMultiRobotPlanning/shortest_path_heuristic.hpp>
+#include <shortest_path_heuristic.hpp>
 
 class Environment {
  public:
