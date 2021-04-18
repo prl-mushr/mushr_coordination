@@ -1,10 +1,11 @@
 <launch>
     <arg name="map_server" value = "1" />
-    
+    <rosparam file="$(find mushr_coordination)/config/4cars1.yaml" command="load" ns="init_planner" />
+
     <!-- Launch  map server-->
     <group if="$(arg map_server)">
         <include file="$(find mushr_sim)/launch/map_server.launch" />
     </group>
 
-    <node pkg="mushr_coordination" type="init_planner.py" name="init_planner" output="screen"/>
+    <node pkg="mushr_coordination" type="init_planner.py" name="init_planner" output="screen" />
 </launch>

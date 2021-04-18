@@ -54,17 +54,23 @@ class MushrCoordination {
       nh.getParam("/mushr_coordination/num_agent", m_num_agent);
       m_car_pose = std::vector<std::pair<double, double>>(m_num_agent);
       for (size_t i = 0; i < m_num_agent; ++i) {
+        std::string name, color;
+        nh.getParam("/mushr_coordination/car" + std::to_string(i + 1) + "/name", name);
+        nh.getParam("/mushr_coordination/car" + std::to_string(i + 1) + "/color", color);
+        std::cout << name << " " << color << std::endl;
+        m_car_name.push_back(name);
+        m_car_color.push_back(color);
         m_sub_car_pose.push_back(nh.subscribe<geometry_msgs::PoseStamped>(
-              "/car" + std::to_string(i + 1) + "/" + (m_sim ? "init_pose" : "mocap_pose"),
+              name + (m_sim ? "/init_pose" : "/mocap_pose"),
               10,
               boost::bind(&MushrCoordination::CarPoseCallback, this, _1, i)
             ));
         m_pub_plan.push_back(nh.advertise<geometry_msgs::PoseArray>(
-              "/car" + std::to_string(i + 1) + "/waypoints", 
+              name + "/waypoints", 
               10
             ));
         m_pub_marker.push_back(nh.advertise<visualization_msgs::Marker>(
-              "/car" + std::to_string(i + 1) + "/marker", 
+              name + "/marker", 
               10
             ));
       }
@@ -156,7 +162,6 @@ class MushrCoordination {
       }
 
       int mkid = 0; //visualize
-      double color[][4] = {{1, 0, 0, 1}, {0, 1, 0, 1}, {0, 0, 1, 1}, {1, 1, 0, 1}, {1, 0, 1, 1}, {0, 1, 1, 1}};
       int num_c = 6;
 
       int dimx = scalex(m_maxx) + 1;
@@ -270,8 +275,8 @@ class MushrCoordination {
             for (size_t i = 0; i < m_goal_pose.size(); i++) {
               if (fabs(scalex(m_goal_pose[i][1].first) - solution[j].states.back().first.x) < 0.0001 &&
                   fabs(scaley(m_goal_pose[i][1].second) - solution[j].states.back().first.y) < 0.0001) {
-                create_marker(&pick, &mkid, m_goal_pose[i][0].first, m_goal_pose[i][0].second, color[a%num_c][0], color[a%num_c][1], color[a%num_c][2], marker_size);
-                create_marker(&drop, &mkid, m_goal_pose[i][1].first, m_goal_pose[i][1].second, color[a%num_c][0], color[a%num_c][1], color[a%num_c][2], marker_size);
+                create_marker(&pick, &mkid, m_goal_pose[i][0].first, m_goal_pose[i][0].second, r_color(m_car_color[a%num_c]), g_color(m_car_color[a%num_c]), b_color(m_car_color[a%num_c]), marker_size);
+                create_marker(&drop, &mkid, m_goal_pose[i][1].first, m_goal_pose[i][1].second, r_color(m_car_color[a%num_c]), g_color(m_car_color[a%num_c]), b_color(m_car_color[a%num_c]), marker_size);
 
                 m_pub_marker[a].publish(pick);
                 m_pub_marker[a].publish(drop);
@@ -355,6 +360,21 @@ class MushrCoordination {
       marker->action = visualization_msgs::Marker::ADD;
     }
 
+    double r_color(std::string hex) {
+      int hexValue = std::stoi(hex, 0, 16);
+      return ((hexValue >> 16) & 0xFF) / 255.0;
+    }
+
+    double g_color(std::string hex) {
+      int hexValue = std::stoi(hex, 0, 16);
+      return  ((hexValue >> 8) & 0xFF) / 255.0;
+    }
+
+    double b_color(std::string hex) {
+      int hexValue = std::stoi(hex, 0, 16);
+      return ((hexValue) & 0xFF) / 255.0; 
+    }
+
     bool isReady() {
       return m_assigned.size() == m_num_agent && m_ini_obs && m_ini_goal && !m_planning;
     }
@@ -385,6 +405,8 @@ class MushrCoordination {
     ros::Publisher m_pub_border;
     std::vector<ros::Publisher> m_pub_plan;
     std::vector<ros::Publisher> m_pub_marker;
+    std::vector<std::string> m_car_name;
+    std::vector<std::string> m_car_color;
     std::vector<std::pair<double, double>> m_car_pose;
     std::vector<std::pair<double, double>> m_obs_pose;
     std::vector<std::vector<std::pair<double, double>>> m_goal_pose;

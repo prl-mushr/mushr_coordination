@@ -17,18 +17,20 @@ if __name__ == "__main__":
     rospy.init_node("init_planner")
     rospy.sleep(1)
 
-    count = 2
-    gcount = 4
+    count = rospy.get_param("init_planner/num_agent")
+    goal_count = 4
     pubs = []
     # this is basically initializing all the subscribers for counting the number of cars and publishers for initiailizing pose and goal points.
     for i in range(count):
-        publisher = rospy.Publisher("/car" + str(i+1) + "/init_pose", PoseStamped, queue_size=5)
+        name = rospy.get_param("init_planner/car" + str(i+1) + "/name")
+        print(name)
+        publisher = rospy.Publisher(name+ "/init_pose", PoseStamped, queue_size=5)
         pubs.append(publisher)
     goal_pub = rospy.Publisher("/mushr_coordination/goals", GoalPoseArray, queue_size=5)
     obs_pub = rospy.Publisher("/mushr_coordination/obstacles", PoseArray, queue_size=5)
     rospy.sleep(1)
 
-    car_pose = [[0, 10], [15, 3]]#, [7, 5], [9, 5]]
+    car_pose = [[0, 10], [15, 3], [7, 5], [9, 5]]
     goal_pose = [[[6, 15], [8, 1]], [[12, 12], [7, 11]], [[10, 5], [5, 10]], [[5, 6], [15, 7]]]
     #car_pose = [[0, 0], [30, 30], [10, 20], [0, 30]]
     #goal_pose = [[[10, 10], [20, 20]], [[30, 10], [10, 30]], [[0, 10], [0, 20]], [[20, 0], [20, 30]]]
@@ -59,7 +61,7 @@ if __name__ == "__main__":
     goalmsg.miny = -2
     goalmsg.maxx = 15
     goalmsg.maxy = 15
-    for i in range(gcount):
+    for i in range(goal_count):
         goalmsg.goals.append(PoseArray())
         for j in range(2):
             goal = Pose()
