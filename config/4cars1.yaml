@@ -1,13 +1,13 @@
 num_agent: 4
 car1:
     name: "car1"
-    color: "FF0000" #red
+    color: "0000FF" #blue
 car2:
     name: "car2"
     color: "00FF00" #green
 car3:
     name: "car3"
-    color: "0000FF" #blue
+    color: "FF0000" #red
 car4:
     name: "car4"
-    color: "DB921D" #orange
+    color: "800080" #purple
