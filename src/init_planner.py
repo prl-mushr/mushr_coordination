@@ -35,8 +35,8 @@ if __name__ == "__main__":
         "/mushr_coordination/obstacles", PoseArray, queue_size=5)
     rospy.sleep(1)
 
-    car_pose = [[5, 2], [2.5, 3], [0, 2], [2.5, 0]]
-    goal_pose = [[[1, 2], [4, 2]], [[0, 0], [3, 1]]]
+    car_pose = [[2, 5], [3, 2.5]]
+    goal_pose = [[[1, 1], [3, 2]], [[1, 4], [3, 3]]]
 
     for i in range(count):
         now = rospy.Time.now()
@@ -62,8 +62,8 @@ if __name__ == "__main__":
     goalmsg.scale = 1
     goalmsg.minx = 0
     goalmsg.miny = 0
-    goalmsg.maxx = 5
-    goalmsg.maxy = 3
+    goalmsg.maxx = 3
+    goalmsg.maxy = 5
     for i in range(goal_count):
         goalmsg.goals.append(PoseArray())
         for j in range(2):
