@@ -19,7 +19,7 @@ if __name__ == "__main__":
     rospy.sleep(1)
 
     count = rospy.get_param("init_planner/num_agent")
-    goal_count = 2
+    goal_count = 4
     pubs = []
     # this is basically initializing all the subscribers for counting the
     # number of cars and publishers for initiailizing pose and goal points.
@@ -35,8 +35,10 @@ if __name__ == "__main__":
         "/mushr_coordination/obstacles", PoseArray, queue_size=5)
     rospy.sleep(1)
 
-    car_pose = [[2, 5], [3, 2.5]]
-    goal_pose = [[[1, 1], [3, 2]], [[1, 4], [3, 3]]]
+    car_pose = [[3.5, 2], [2.5, 3]]
+    goal_pose = [[[1.75, 3], [3.25, 0.5]], [[3.5, 1.5], [1, 4.5]],
+                 [[1, 1], [3, 4]], [[1.5, 1.5], [2, 2]]]
+
 
     for i in range(count):
         now = rospy.Time.now()
