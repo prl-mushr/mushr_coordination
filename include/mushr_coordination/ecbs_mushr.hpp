@@ -312,22 +312,21 @@ class Environment {
         m_waypoints.push_back(goal);
     }
     for (size_t i = 0; i < startStates.size(); ++i) {
-      std::cout << startStates[i] << std::endl;
+      // std::cout << startStates[i] << std::endl;
       for (const auto& goal : goals) {
-        //std::cout << goal.points[0] << std::endl;
-        int cost = 0;
+        // std::cout << goal.points[0] << std::endl;
+        long cost = 0;
         if (!goal.points.empty() && goal.points[0].x >= 0) {
           cost = m_heuristic.getValue(Location(startStates[i].x, startStates[i].y), goal.points[startStates[i].index]);
-          // std::cout << cost << " ";
-          for (size_t j = startStates[i].index; j < numw - 1; ++j) {
-            std::cout << goal.points[j] << std::endl;
+          for (size_t j = startStates[i].index; j < m_numw - 1; ++j) {
+            // std::cout << goal.points[j] << std::endl;
             cost += m_heuristic.getValue(goal.points[j], goal.points[j + 1]);
             // std::cout << cost << " ";
           }
         } else if (!goal.points.empty()) {
           cost = m_heuristic.getValue(Location(startStates[i].x, startStates[i].y), Location(startStates[i].x, startStates[i].y));
+          // std::cout << cost << " "  << std::endl;
         }
-        // std::cout << cost << " " << goal << " " << startStates[i] << std::endl;
         m_assignment.setCost(i, goal, cost);
       }
     }
@@ -372,7 +371,7 @@ class Environment {
       return cost;
       //return m_heuristic.getValue(Location(s.x, s.y), *m_goal);
     } else {
-      std::cout << "exit" << std::endl;
+      // std::cout << "exit" << std::endl;
       return 0;
     }
   }

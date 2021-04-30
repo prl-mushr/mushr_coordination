@@ -1,0 +1,7 @@
+num_agent: 2
+car1:
+    name: "car1"
+    color: "FF0000" #red
+car2:
+    name: "car2"
+    color: "00FF00" #green
