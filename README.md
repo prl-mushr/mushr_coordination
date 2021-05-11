@@ -15,20 +15,21 @@ For adjusting params see `launch/mushr_coordination.launch` it has the environme
 ### Publishers
 Topic | Type | Description
 ------|------|------------
-`/car1/waypoints` | [geometry_msgs/PoseArray](http://docs.ros.org/en/melodic/api/geometry_msgs/html/msg/PoseArray.htmll)| Pathway assigned to car 1
+`/{car_1's name}/waypoints` | [geometry_msgs/PoseArray](http://docs.ros.org/en/melodic/api/geometry_msgs/html/msg/PoseArray.htmll)| Pathway assigned to car_1
 ...
-`/car{n}/waypoints`| [geometry_msgs/PoseArray](http://docs.ros.org/en/melodic/api/geometry_msgs/html/msg/PoseArray.htmll) | Pathway assigned to car {n}
-`/car1/marker` | [visualization_msgs/Marker](http://docs.ros.org/en/api/visualization_msgs/html/msg/Marker.html)| Intermediate points of task(s) assigned to car 1 
+`/{car_n's name}/waypoints`| [geometry_msgs/PoseArray](http://docs.ros.org/en/melodic/api/geometry_msgs/html/msg/PoseArray.htmll) | Pathway assigned to car_n
+`/{car_1's name}/marker` | [visualization_msgs/Marker](http://docs.ros.org/en/api/visualization_msgs/html/msg/Marker.html)| Intermediate points of task(s) assigned to car_1 
 ...
-`/car{n}/marker`| [visualization_msgs/Marker](http://docs.ros.org/en/api/visualization_msgs/html/msg/Marker.html) | Intermediate points of task(s) assigned to car {n} 
+`/{car_n's name}/marker`| [visualization_msgs/Marker](http://docs.ros.org/en/api/visualization_msgs/html/msg/Marker.html) | Intermediate points of task(s) assigned to car_n 
+`/mushr_coodination/border` | [visualization_msgs/Marker](http://docs.ros.org/en/api/visualization_msgs/html/msg/Marker.html) | Borderline of the current setup environment for the planner
 
 
 ### Subscribers
 Topic | Type | Description
 ------|------|------------
-`/car1/init_pose` | [geometry_msgs/PoseStamp](http://docs.ros.org/en/melodic/api/geometry_msgs/html/msg/PoseStamped.html)| Initial position of car 1
+`/{car_1's name}/init_pose` | [geometry_msgs/PoseStamp](http://docs.ros.org/en/melodic/api/geometry_msgs/html/msg/PoseStamped.html)| Initial position of car_1
 ...
-`/car{n}/init_pose` | [geometry_msgs/PoseStamp](http://docs.ros.org/en/melodic/api/geometry_msgs/html/msg/PoseStamped.html)| Initial position of car {n}
+`/{car_n's name}/init_pose` | [geometry_msgs/PoseStamp](http://docs.ros.org/en/melodic/api/geometry_msgs/html/msg/PoseStamped.html)| Initial position of car_n
 `/mushr_coordination/obstacles` | [geometry_msgs/PoseArray](http://docs.ros.org/en/melodic/api/geometry_msgs/html/msg/PoseArray.htmll)| List of obstacles in the map
 `/mushr_coordination/goals` | [/mushr_coordination/GoalPoseArray](#mushr_coordination/GoalPoseArray ) | List of goals for {n} cars to complete
 
