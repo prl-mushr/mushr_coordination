@@ -1,9 +1,9 @@
 num_agent: 2
 car1:
-    name: "car30"
+    name: "car1"
     color: "0000FF" #blue
 car2:
-    name: "car38"
+    name: "car2"
     color: "00FF00" #green
 # car3:
 #     name: "car3"
