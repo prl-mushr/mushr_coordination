@@ -1,6 +1,9 @@
 <launch>
-    <arg name="map_server" value = "1" />
-    <rosparam file="$(find mushr_coordination)/config/4cars1.yaml" command="load" ns="init_planner" />
+    <arg name="map_server" default = "1" />
+    <arg name="cars_file" default = "4cars.yaml" />
+    <arg name="tasks_file" default = "4cars4tasks5x3.yaml" />
+    <rosparam file="$(find mushr_coordination)/config/$(arg cars_file)" command="load" ns="init_planner" />
+    <rosparam file="$(find mushr_coordination)/benchmark/$(arg tasks_file)" command="load" ns="init_planner" />
 
     <!-- Launch  map server-->
     <group if="$(arg map_server)">

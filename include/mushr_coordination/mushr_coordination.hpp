@@ -135,18 +135,14 @@ class MushrCoordination {
       std::unordered_set<Location> obstacles;
       std::vector<State> startStates;
       std::vector<Waypoints> goals;
+
+      int extra = 0;
       // init goals
       for (auto& goal: m_goal_pose) {
         std::vector<Location> ls;
         for(auto& waypoint: goal) {
           ls.emplace_back(scalex(waypoint.first), scaley(waypoint.second));
         }
-        goals.emplace_back(ls);
-      }
-      int extra = m_num_agent - goals.size();
-      for (int i = 0; i < extra; i++) {
-        std::vector<Location> ls;
-        ls.emplace_back(-i - 1, -i - 1);
         goals.emplace_back(ls);
       }
       for (auto & g: goals) {
@@ -162,17 +158,22 @@ class MushrCoordination {
       }
 
       int mkid = 0; //visualize
-      int num_c = 6;
 
       int dimx = scalex(m_maxx) + 1;
       int dimy = scaley(m_maxy) + 1;
       bool success = true;
       std::vector<int> startTime;
       std::vector<PlanResult<State, Action, int> > solution;
-      std::cout << dimx << " " << dimy << " " << m_num_agent << " " << m_num_waypoint << std::endl;
+      std::cout << "x: " << dimx << ", y: " << dimy << ", agent: " << m_num_agent << ", task: "<< m_goal_pose.size() << ", waypoint: " << m_num_waypoint << std::endl;
 
       startTime.push_back(0);
       while (goals.size() > 0 && success) {
+        extra = m_num_agent - goals.size() > 0 ? m_num_agent - goals.size() : 0;
+        for (int i = 0; i < extra; i++) {
+          std::vector<Location> ls;
+          ls.emplace_back(-i - 1, -i - 1);
+          goals.emplace_back(ls);
+        }
         Environment mapf(dimx, dimy, m_num_waypoint, obstacles, startStates, goals,
                       m_maxTaskAssignments);
         ECBSTA<State, Action, int, Conflict, Constraints, Waypoints,
@@ -198,16 +199,18 @@ class MushrCoordination {
         }
         startTime.push_back(sub_makespan);
         solution.insert(solution.end(), sub_solution.begin(), sub_solution.end());
-        if (success && goals.size() > 0) {
-          std::cout << "finish " << ct << " tasks, " << goals.size() << " task remaining" << std::endl;
+        if (success && goals.size() - extra > 0) {
+          std::cout << "finish " << ct + extra << " tasks, " << goals.size() - extra << " task remaining" << std::endl;
         } else if (success) {
           std::cout << "planner success" << std::endl;
+          break;
         } else {
           std::cout << "planner failed" << std::endl;
+          break;
         }
         std::cout << "---------------------" << std::endl;
       }
-      create_border(1, 0, 0, 0.5);
+      create_border(1, 1, 1, 0.1);
 
       if (success) {
         for (size_t a = 0; a < m_num_agent; ++a) {
@@ -275,8 +278,8 @@ class MushrCoordination {
             for (size_t i = 0; i < m_goal_pose.size(); i++) {
               if (fabs(scalex(m_goal_pose[i][1].first) - solution[j].states.back().first.x) < 0.0001 &&
                   fabs(scaley(m_goal_pose[i][1].second) - solution[j].states.back().first.y) < 0.0001) {
-                create_marker(&pick, &mkid, m_goal_pose[i][0].first, m_goal_pose[i][0].second, r_color(m_car_color[a%num_c]), g_color(m_car_color[a%num_c]), b_color(m_car_color[a%num_c]), marker_size);
-                create_marker(&drop, &mkid, m_goal_pose[i][1].first, m_goal_pose[i][1].second, r_color(m_car_color[a%num_c]), g_color(m_car_color[a%num_c]), b_color(m_car_color[a%num_c]), marker_size);
+                create_marker(&pick, &mkid, m_goal_pose[i][0].first, m_goal_pose[i][0].second, r_color(m_car_color[a]), g_color(m_car_color[a]), b_color(m_car_color[a]), marker_size, 0);
+                create_marker(&drop, &mkid, m_goal_pose[i][1].first, m_goal_pose[i][1].second, r_color(m_car_color[a]), g_color(m_car_color[a]), b_color(m_car_color[a]), marker_size, 1);
 
                 m_pub_marker[a].publish(pick);
                 m_pub_marker[a].publish(drop);
@@ -334,7 +337,7 @@ class MushrCoordination {
       m_pub_border.publish(marker);
     }
 
-    void create_marker(visualization_msgs::Marker* marker, int* mkid, double x, double y, double r, double g, double b, double size) {
+    void create_marker(visualization_msgs::Marker* marker, int* mkid, double x, double y, double r, double g, double b, double size, int last) {
       marker->pose.position.x = x;
       marker->pose.position.y = y;
       marker->pose.position.z = 0;
@@ -356,7 +359,8 @@ class MushrCoordination {
       marker->header.frame_id = "map";
       marker->header.stamp = ros::Time();
       marker->id = (*mkid)++;
-      marker->type = visualization_msgs::Marker::SPHERE;
+
+      marker->type = last ? visualization_msgs::Marker::SPHERE : visualization_msgs::Marker::CUBE;
       marker->action = visualization_msgs::Marker::ADD;
     }
 
