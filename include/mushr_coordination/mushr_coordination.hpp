@@ -24,9 +24,11 @@
 #include "geometry_msgs/Point.h"
 #include "geometry_msgs/PoseStamped.h"
 #include "geometry_msgs/PoseArray.h"
+#include "geometry_msgs/Pose.h"
 #include "ackermann_msgs/AckermannDriveStamped.h"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.h"
 #include "visualization_msgs/Marker.h"
+#include "clcbs_ros/GoalPoseArray.h"
 
 
 // TODO: need namespace for the header
@@ -65,15 +67,11 @@ class MushrCoordination {
               10,
               boost::bind(&MushrCoordination::CarPoseCallback, this, _1, i)
             ));
-        m_pub_plan.push_back(nh.advertise<geometry_msgs::PoseArray>(
-              name + "/waypoints", 
-              10
-            ));
-        m_pub_marker.push_back(nh.advertise<visualization_msgs::Marker>(
-              name + "/marker", 
-              10
-            ));
       }
+      m_pub_goals = nh.advertise<clcbs_ros::GoalPoseArray>(
+          "/clcbs_ros/goals", 
+          10
+        );
       m_pub_border = nh.advertise<visualization_msgs::Marker>(
           "/mushr_coordination/border",
           10
@@ -120,7 +118,7 @@ class MushrCoordination {
       for (auto &goal : msg->goals) {
         m_goal_pose.emplace_back();
         for (auto &pose : goal.poses) {
-          m_goal_pose.back().emplace_back(pose.position.x, pose.position.y);
+          m_goal_pose.back().emplace_back(pose);
         }
       }
       if (isReady()) {
@@ -141,7 +139,7 @@ class MushrCoordination {
       for (auto& goal: m_goal_pose) {
         std::vector<Location> ls;
         for(auto& waypoint: goal) {
-          ls.emplace_back(scalex(waypoint.first), scaley(waypoint.second));
+          ls.emplace_back(scalex(waypoint.position.x), scaley(waypoint.position.y));
         }
         goals.emplace_back(ls);
       }
@@ -213,84 +211,33 @@ class MushrCoordination {
       create_border(1, 1, 1, 0.1);
 
       if (success) {
+        clcbs_ros::GoalPoseArray goalmsg;
+        goalmsg.header.frame_id = "/map";
+        goalmsg.header.stamp = ros::Time::now();
+        goalmsg.num_agent = m_num_agent;
+        goalmsg.num_waypoint = m_num_waypoint;
+        goalmsg.scale = m_scale;
+        goalmsg.minx = m_minx;
+        goalmsg.miny = m_miny;
+        goalmsg.maxx = m_maxx;
+        goalmsg.maxy = m_maxy;
+        // goalmsg.align_dist = 0.5;
         for (size_t a = 0; a < m_num_agent; ++a) {
-          int prev_time = 0;
-          geometry_msgs::PoseArray plan;
-          plan.header.stamp = ros::Time::now();
-          plan.header.frame_id = "map";
+          goalmsg.goals.emplace_back();
           for(int t = 0; t < startTime.size() - 1; t++) {
             int j = t * m_num_agent + a;
-            int time = 1;
-            for (size_t i = 0; i < solution[j].states.size(); i++) {
-              geometry_msgs::Pose p;
-              // visualize
-              if (solution[j].states[i].second == 0) {
-                time += startTime[t] - prev_time;
-              }
-              switch (solution[j].actions[i].first) {
-                case Action::Up: 
-                  p.orientation.x = 0;
-                  p.orientation.y = 0;
-                  p.orientation.z = 0.707;
-                  p.orientation.w = 0.707;
-                  break;
-                case Action::Down:
-                  p.orientation.x = 0;
-                  p.orientation.y = 0;
-                  p.orientation.z = 0.707;
-                  p.orientation.w = -0.707;
-                  break;
-                case Action::Left: 
-                  p.orientation.x = 0;
-                  p.orientation.y = 0;
-                  p.orientation.z = 1;
-                  p.orientation.w = 0;
-                  break;
-                case Action::Right:
-                  p.orientation.x = 0;
-                  p.orientation.y = 0;
-                  p.orientation.z = 0;
-                  p.orientation.w = 1; 
-                  break;
-              //
-                case Action::Wait:
-                  if (i < solution[j].states.size() - 1) {
-                    time++;
-                    continue;
-                  }
-                  break;
-              }
-                          
-              double x = r_scalex(solution[j].states[i].first.x);
-              double y = r_scaley(solution[j].states[i].first.y);
-              p.position.x = x;
-              p.position.y = y;
-              p.position.z = time * 0.001;
-
-              plan.poses.push_back(p);
-              time = 1;
-            }
-            prev_time = solution[j].states.back().second + startTime[t] + 1;
-            // visualize
-            visualization_msgs::Marker pick;
-            visualization_msgs::Marker drop;
-            double marker_size = 0.25; 
             for (size_t i = 0; i < m_goal_pose.size(); i++) {
-              if (fabs(scalex(m_goal_pose[i][1].first) - solution[j].states.back().first.x) < 0.0001 &&
-                  fabs(scaley(m_goal_pose[i][1].second) - solution[j].states.back().first.y) < 0.0001) {
-                create_marker(&pick, &mkid, m_goal_pose[i][0].first, m_goal_pose[i][0].second, r_color(m_car_color[a]), g_color(m_car_color[a]), b_color(m_car_color[a]), marker_size, 0);
-                create_marker(&drop, &mkid, m_goal_pose[i][1].first, m_goal_pose[i][1].second, r_color(m_car_color[a]), g_color(m_car_color[a]), b_color(m_car_color[a]), marker_size, 1);
-
-                m_pub_marker[a].publish(pick);
-                m_pub_marker[a].publish(drop);
+              if (fabs(scalex(m_goal_pose[i][1].position.x) - solution[j].states.back().first.x) < 0.0001 &&
+                  fabs(scaley(m_goal_pose[i][1].position.y) - solution[j].states.back().first.y) < 0.0001) {
+                goalmsg.goals[a].poses.emplace_back(m_goal_pose[i][0]);
+                goalmsg.goals[a].poses.emplace_back(m_goal_pose[i][1]);
                 break;
               }
             } 
           }
-          m_pub_plan[a].publish(plan);
-          plan.poses.clear();
-          std::cout << "publish plan for car " << a+1 << std::endl;
         }
+        m_pub_goals.publish(goalmsg);
+        std::cout << "publish goals to clcbs" << std::endl;
       }
       
       m_goal_pose.clear();
@@ -407,13 +354,12 @@ class MushrCoordination {
     ros::Subscriber m_sub_obs_pose;
     ros::Subscriber m_sub_goal;
     ros::Publisher m_pub_border;
-    std::vector<ros::Publisher> m_pub_plan;
-    std::vector<ros::Publisher> m_pub_marker;
+    ros::Publisher m_pub_goals;
     std::vector<std::string> m_car_name;
     std::vector<std::string> m_car_color;
     std::vector<std::pair<double, double>> m_car_pose;
     std::vector<std::pair<double, double>> m_obs_pose;
-    std::vector<std::vector<std::pair<double, double>>> m_goal_pose;
+    std::vector<std::vector<geometry_msgs::Pose>> m_goal_pose;
     std::set<size_t> m_assigned;
     bool m_planning;
     bool m_ini_obs;

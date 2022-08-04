@@ -1,7 +1,7 @@
 <launch>
     <arg name="w" default = "1.3" />
     <arg name="num_waypoint" default = "2" /> <!-- number of waypoint that car have to visit for each task-->
-    <arg name="cars_file" default = "4cars1.yaml" />
+    <arg name="cars_file" default = "2cars.yaml" />
     <rosparam file="$(find mushr_coordination)/config/$(arg cars_file)" command="load" ns="mushr_coordination" />
 
     <node pkg="mushr_coordination" type="mushr_coordination" name="mushr_coordination" output="screen">

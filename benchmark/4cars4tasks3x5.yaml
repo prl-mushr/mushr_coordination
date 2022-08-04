@@ -1,0 +1,47 @@
+num_task: 4
+num_waypoint: 2
+scale: 2
+minx: 0
+miny: 0
+maxx: 4
+maxy: 5
+car1:
+  x: 1
+  y: 0
+car2:
+  x: 0.5
+  y: 0
+car3:
+  x: 3.5
+  y: 0
+car4:
+  x: 3
+  y: 0
+task1:
+  p1:
+    x: 1
+    y: 1
+  p2:
+    x: 1
+    y: 2
+task2:
+  p1:
+    x: 1
+    y: 3
+  p2:
+    x: 1.5
+    y: 3
+task3:
+  p1:
+    x: 2
+    y: 3
+  p2:
+    x: 2
+    y: 2
+task4:
+  p1:
+    x: 2
+    y: 1
+  p2:
+    x: 1.5
+    y: 1
