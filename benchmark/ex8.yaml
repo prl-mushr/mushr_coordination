@@ -1,0 +1,62 @@
+num_agent: 4
+num_task: 3
+num_waypoint: 2
+scale: 2
+minx: 0
+miny: 0
+maxx: 4
+maxy: 6
+randomness: [0.0, 0.0, 0.0]
+
+car1:
+  x: 4
+  y: 0
+  t: 1.5708
+task1:
+  p1:
+    x: 1.5
+    y: 3
+    t: 1.5708
+  p2:
+    x: 4
+    y: 6
+    t: 0
+car2:
+  x: 2
+  y: 6
+  t: -1.5708
+task4:
+  p1:
+    x: 3.5
+    y: 3
+    t: 1.5708
+  p2:
+    x: 0
+    y: 6
+    t: 3.1415
+car3:
+  x: 0
+  y: 0
+  t: 1.5708
+task3:
+  p1:
+    x: 2.5
+    y: 3.5
+    t: -1.5708
+  p2:
+    x: 3
+    y: 0
+    t: -1.5708
+car4:
+  x: 0
+  y: 6
+  t: -1.5708
+task2:
+  p1:
+    x: 0.5
+    y: 3.5
+    t: -1.5708
+  p2:
+    x: 0
+    y: 0
+    t: -1.5708

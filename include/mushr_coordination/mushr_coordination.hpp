@@ -54,7 +54,7 @@ class MushrCoordination {
       nh.getParam("/mushr_coordination/w", m_w);
       nh.getParam("/mushr_coordination/num_waypoint", m_num_waypoint);
       nh.getParam("/mushr_coordination/num_agent", m_num_agent);
-      m_car_pose = std::vector<std::pair<double, double>>(m_num_agent);
+      m_car_pose = std::vector<geometry_msgs::Pose>(m_num_agent);
       for (size_t i = 0; i < m_num_agent; ++i) {
         std::string name, color;
         nh.getParam("/mushr_coordination/car" + std::to_string(i + 1) + "/name", name);
@@ -90,7 +90,7 @@ class MushrCoordination {
     void CarPoseCallback(const geometry_msgs::PoseStamped::ConstPtr& msg, size_t i) {
       std::cout << "get car " << i << std::endl;
       m_assigned.insert(i);
-      m_car_pose[i] = std::make_pair(msg->pose.position.x, msg->pose.position.y);
+      m_car_pose[i] = msg->pose;
       if (isReady()) {
           solve();
       }
@@ -132,6 +132,7 @@ class MushrCoordination {
       std::cout << "start planning" << std::endl;
       std::unordered_set<Location> obstacles;
       std::vector<State> startStates;
+      std::vector<State> oldStartStates;
       std::vector<Waypoints> goals;
 
       int extra = 0;
@@ -152,7 +153,7 @@ class MushrCoordination {
       }
       // init start states
       for(auto& pos: m_car_pose) {
-        startStates.emplace_back(0, scalex(pos.first), scaley(pos.second), 0); 
+        startStates.emplace_back(0, scalex(pos.position.x), scaley(pos.position.y), 0); 
       }
 
       int mkid = 0; //visualize
@@ -180,6 +181,7 @@ class MushrCoordination {
         
         std::vector<PlanResult<State, Action, int> > sub_solution;
         success &= cbs.search(startStates, sub_solution);
+        oldStartStates = startStates;
         startStates.clear();
         std::vector<Waypoints>::iterator it;
         int ct = 0;
@@ -215,25 +217,37 @@ class MushrCoordination {
         goalmsg.header.frame_id = "/map";
         goalmsg.header.stamp = ros::Time::now();
         goalmsg.num_agent = m_num_agent;
-        goalmsg.num_waypoint = m_num_waypoint;
+        goalmsg.num_waypoint = m_num_waypoint * (startTime.size() - 1);
         goalmsg.scale = m_scale;
         goalmsg.minx = m_minx;
         goalmsg.miny = m_miny;
         goalmsg.maxx = m_maxx;
         goalmsg.maxy = m_maxy;
         // goalmsg.align_dist = 0.5;
+        std::vector<bool> used(m_goal_pose.size());
         for (size_t a = 0; a < m_num_agent; ++a) {
           goalmsg.goals.emplace_back();
           for(int t = 0; t < startTime.size() - 1; t++) {
             int j = t * m_num_agent + a;
-            for (size_t i = 0; i < m_goal_pose.size(); i++) {
-              if (fabs(scalex(m_goal_pose[i][1].position.x) - solution[j].states.back().first.x) < 0.0001 &&
+            bool found = false;
+            for (size_t i = 0; i < m_goal_pose.size() && !found; i++) {
+              if (!used[i] && fabs(scalex(m_goal_pose[i][1].position.x) - solution[j].states.back().first.x) < 0.0001 &&
                   fabs(scaley(m_goal_pose[i][1].position.y) - solution[j].states.back().first.y) < 0.0001) {
                 goalmsg.goals[a].poses.emplace_back(m_goal_pose[i][0]);
                 goalmsg.goals[a].poses.emplace_back(m_goal_pose[i][1]);
-                break;
+                found = true;
+                used[i] = true;
               }
             } 
+            if (!found) {
+              if (goalmsg.goals[a].poses.empty()) {
+                goalmsg.goals[a].poses.emplace_back(m_car_pose[a]);
+                goalmsg.goals[a].poses.emplace_back(m_car_pose[a]);
+              } else {                
+                goalmsg.goals[a].poses.emplace_back(goalmsg.goals[a].poses.back());
+                goalmsg.goals[a].poses.emplace_back(goalmsg.goals[a].poses.back());
+              }
+            }
           }
         }
         m_pub_goals.publish(goalmsg);
@@ -242,7 +256,7 @@ class MushrCoordination {
       
       m_goal_pose.clear();
       m_obs_pose.clear();
-      m_car_pose = std::vector<std::pair<double, double>>(m_num_agent);
+      m_car_pose = std::vector<geometry_msgs::Pose>(m_num_agent);
       m_ini_obs = false;
       m_ini_goal = false;
       m_assigned.clear();
@@ -357,7 +371,7 @@ class MushrCoordination {
     ros::Publisher m_pub_goals;
     std::vector<std::string> m_car_name;
     std::vector<std::string> m_car_color;
-    std::vector<std::pair<double, double>> m_car_pose;
+    std::vector<geometry_msgs::Pose> m_car_pose;
     std::vector<std::pair<double, double>> m_obs_pose;
     std::vector<std::vector<geometry_msgs::Pose>> m_goal_pose;
     std::set<size_t> m_assigned;
