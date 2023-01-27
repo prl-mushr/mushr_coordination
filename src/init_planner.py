@@ -2,7 +2,7 @@
 
 import rospy
 import tf
-from geometry_msgs.msg import PoseStamped, PoseArray, Pose, Quaternion
+from geometry_msgs.msg import PoseStamped, PoseArray, Pose, Quaternion, PoseWithCovarianceStamped
 import time
 import math
 from mushr_coordination.msg import GoalPoseArray
@@ -36,12 +36,15 @@ if __name__ == "__main__":
     y_min = rospy.get_param("init_clcbs/miny")
     y_max = rospy.get_param("init_clcbs/maxy")
     pubs = []
+    pose_pubs = []
     mocap_subs = []
     # this is basically initializing all the subscribers for counting the number of cars and publishers for initiailizing pose and goal points.
     for i in range(num_agent):
         name = rospy.get_param("init_clcbs/car" + str(i+1) + "/name")
         publisher = rospy.Publisher(name + "/init_pose", PoseStamped, queue_size=5)
         pubs.append(publisher)
+        pose_publisher = rospy.Publisher(name + "/initialpose", PoseWithCovarianceStamped, queue_size=5)
+        pose_pubs.append(pose_publisher)
         if use_mocap_start:
             mocap_poses.append(PoseStamped())
             mocap_poses[i].pose.position.z = INVALID_POSE_Z
@@ -65,9 +68,14 @@ if __name__ == "__main__":
             carmsg.pose.position.y = min(y_max, max(y_min, rospy.get_param("init_clcbs/car" + str(i + 1) + "/y") + random.uniform(-randomness[1], randomness[1])))
             carmsg.pose.position.z = 0.0
             carmsg.pose.orientation = angle_to_quaternion(rospy.get_param("init_clcbs/car" + str(i + 1) + "/t"))
+        cur_pose = PoseWithCovarianceStamped()
+        cur_pose.header.frame_id = "/map"
+        cur_pose.header.stamp = now
+        cur_pose.pose.pose = carmsg.pose
         print(carmsg)
         rospy.sleep(1)
         pubs[i].publish(carmsg)
+        pose_pubs[i].publish(cur_pose)
 
     now = rospy.Time.now()
     obsmsg = PoseArray()
