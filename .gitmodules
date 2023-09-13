@@ -1,0 +1,4 @@
+[submodule "libMultiRobotPlanning"]
+	path = libMultiRobotPlanning
+	url = https://github.com/whoenig/libMultiRobotPlanning
+	branch = main
