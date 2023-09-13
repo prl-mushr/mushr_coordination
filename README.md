@@ -5,8 +5,7 @@
 ## Install
 Clone repo: 
 ``` 
-cd ~/catkin_ws/src/ && git clone https://github.com/prl-mushr/mushr_coordination.git
-cd mushr_coordination && git clone https://github.com/whoenig/libMultiRobotPlanning.git
+cd ~/catkin_ws/src/ && git clone --recurse-submodules https://github.com/prl-mushr/mushr_coordination.git
 ```
 
 ## API
